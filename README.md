@@ -20,8 +20,18 @@ doesn't handle, I'd love to get a pull request from you. (Hint: open IRB,
 load Mechanize, and work through it-- then send me the commands, and what
 differentiates the portal you found from the portals I *do* solve.)
 
-Dependencies
-============
+OS Dependencies
+=================
+PortalSmash needs to run on Linux with all of the following availale:
+- ruby
+- wpa_cli
+- dhclient
+- wpa_supplicant
+- ifconfig
+- pkill 
+
+Ruby Dependencies
+=================
 Ruby Mechanize and Ruby Trollop. Mechanize is kind of a heavy
 library, but PortalSmash needs it to parse and interact with (often really
 badly coded) captive portal pages. They can be installed with:
