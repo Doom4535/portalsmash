@@ -20,17 +20,22 @@ doesn't handle, I'd love to get a pull request from you. (Hint: open IRB,
 load Mechanize, and work through it-- then send me the commands, and what
 differentiates the portal you found from the portals I *do* solve.)
 
-Dependencies: Ruby Mechanize and Ruby Trollop. Mechanize is kind of a heavy
+Dependencies
+============
+Ruby Mechanize and Ruby Trollop. Mechanize is kind of a heavy
 library, but PortalSmash needs it to parse and interact with (often really
 badly coded) captive portal pages. They can be installed with:
 
     gem install trollop mechanize
 
-To use:
+Usage
+=====
 
     sudo ./portalsmash.rb [-d devicename] [-n netconfig file]
        
-Netfile format:
+Netfile format
+==============
+
 PortalSmash allows a network key file to be specified that includes, well, keys
 for networks. The file must be in YAML, and formatted approximately as so:
 
@@ -45,6 +50,8 @@ This will allow the program to connect to WiFi for which you have been given
 credentials (e.g., your home WiFi network). PortalSmash will connect to known
 networks before unknown networks.
 
+Legal
+=====
 
 (C) 2012-2013, Malice Afterthought, Inc.
 
