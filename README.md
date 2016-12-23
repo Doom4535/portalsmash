@@ -38,6 +38,8 @@ badly coded) captive portal pages. They can be installed with:
 
     gem install trollop mechanize
 
+In practice, see http://www.nokogiri.org/tutorials/installing_nokogiri.html because something usually goes wrong with the install.
+
 Usage
 =====
 
