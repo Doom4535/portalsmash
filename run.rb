@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'trollop'
 require_relative 'portalsmash'
+require_relative 'exec'
 
 opts = Trollop::options do
   version "Version 0.01, (c) 2013 Malice Afterthought, Inc."
@@ -45,6 +46,6 @@ HEREBEDRAGONS
 end
 
 
-
-ps = PortalSmasher.new(opts[:device], opts[:netfile], opts[:sig])
+exec = Exec.new
+ps = PortalSmasher.new(opts[:device], opts[:netfile], opts[:sig], exec)
 ps.run

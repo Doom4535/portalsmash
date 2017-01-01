@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'mechanize'
 require 'yaml'
+require_relative 'exec'
 
 #State Machine
 
@@ -32,17 +33,17 @@ require 'yaml'
 class PortalSmasher
 
   #Variables for seeing what it's doing right now - not modifiable outside the class
-  attr_reader :state, :running, :scan_success, :attach_state, :dhcp_success, :cc_success, :number_of_networks, :net_counter
+  attr_reader :state, :running, :scan_success, :attach_state, :dhcp_success, :cc_success, :number_of_networks, :net_counter, :exec
 
   TESTPAGE = 'http://www.apple.com/library/test/success.html'
   CONFPATH = '/tmp/portalsmash.conf'
-  DHCP_CONFIG = File.dirname(__FILE__)+'/dhclient.conf'
 
   ATTACH_SUCCESS = 0
   ATTACH_FAIL = 1
   ATTACH_OUT = 2
 
-  def initialize(dev, file, sig)
+  def initialize(dev, file, sig, exec)
+    @exec = exec
     @state = :start
     @running = true
 
@@ -75,9 +76,9 @@ class PortalSmasher
     File.open(CONFPATH, "w") do |f|
       f.puts "ctrl_interface=DIR=/var/run/wpa_supplicant"
 
-      networklist = `iwlist #{@device} scan`;
+      networklist = exec.iwlist(@device)
 
-      if ($?.exitstatus != 0)
+      if (exec.exitstatus != 0)
         return false #iwlist didn't work right.
       end
 
@@ -164,12 +165,12 @@ class PortalSmasher
     end
     puts "Attaching to Network #{@net_counter+1} of #{@number_of_networks}."
 
-    `wpa_cli select #{@net_counter}`
+    exec.wpa_cli_select(@net_counter)
 
     @net_counter += 1
 
     sleep(5)
-    stat = `wpa_cli status`
+    stat = @exec.wpa_cli_status
 
     if (stat =~ /COMPLETED/)
       return ATTACH_SUCCESS
@@ -184,10 +185,10 @@ class PortalSmasher
   def dhcp
     puts "DCHP-ing"
 
-    `dhclient #{@device} -cf #{DHCP_CONFIG} -r` #DHCP Release, and tells any old DHClients to let go of @device
-    `dhclient #{@device} -cf #{DHCP_CONFIG} -1` #Try just once, with timeout specified in DHCP_CONFIG
+    exec.dhclient_release(@device)
+    exec.dhclient(@device)
 
-    if $?.exitstatus != 0
+    if @exec.exitstatus != 0
       return false
     else
       return true
@@ -233,14 +234,14 @@ class PortalSmasher
   end
 
   def killthings
-    `pkill -KILL wpa_supplicant`
-    `pkill -KILL dhclient`
-    `ifconfig #{@device} up` #because when we've killed this, sometimes it stays down.
+    exec.pkill_wpa_supplicant
+    exec.pkill_dhclient
+    exec.ifconfig_up(@device)
   end
 
   def startwpa
-    `wpa_supplicant -B -i #{@device} -c #{CONFPATH}`
-    if $?.exitstatus != 0
+    exec.wpa_supplicant(device)
+    if exec.exitstatus != 0
       return false
     else
       return true
@@ -255,7 +256,7 @@ class PortalSmasher
         puts "I was given a PID file to tell, but I don't see it."
       end
       if !pid.nil?
-        `kill -s SIGUSR1 #{pid}`
+        exec.kill(pid)
       end
     end
   end
