@@ -64,7 +64,7 @@ class PortalSmasher
   end
 
   def attach
-    if (@net_counter.to_i >= number_of_networks.to_i)
+    if (out_of_networks_to_attach_to)
       log "I'm out of networks to which I can attach."
       return ATTACH_OUT
     end
@@ -75,16 +75,24 @@ class PortalSmasher
     @net_counter += 1
 
     snooze 5
-    stat = @exec.wpa_cli_status
 
-    if (stat =~ /COMPLETED/)
+    if (attach_successful)
       return ATTACH_SUCCESS
-    elsif (@net_counter.to_i >= number_of_networks.to_i)
+    elsif (out_of_networks_to_attach_to)
       return ATTACH_OUT
     else
       return ATTACH_FAIL
     end
 
+  end
+
+  def out_of_networks_to_attach_to
+    @net_counter.to_i >= number_of_networks.to_i
+  end
+
+  def attach_successful
+    stat = exec.wpa_cli_status
+    stat =~ /COMPLETED/
   end
 
   def dhcp
