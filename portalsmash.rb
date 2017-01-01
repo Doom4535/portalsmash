@@ -241,11 +241,7 @@ class PortalSmasher
 
   def startwpa
     exec.wpa_supplicant(device)
-    if exec.exitstatus != 0
-      return false
-    else
-      return true
-    end
+    exec.exitstatus == 0
   end
 
   def sendsig
