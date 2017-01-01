@@ -2,20 +2,18 @@
 
 require 'rubygems'
 require 'yaml'
+require_relative 'log'
 
 class Scanner
 
-  #Variables for seeing what it's doing right now - not modifiable outside the class
   attr_reader :number_of_networks, :exec
 
   CONFPATH = '/tmp/portalsmash.conf'
 
   def initialize(dev, file, exec)
     @exec = exec
-
+    @logger = Log.new
     @number_of_networks = 0
-
-    #Storage variables internal to the class (No accessors)
     @device = dev
     @knownnetworks = {}
 
@@ -25,7 +23,7 @@ class Scanner
   end
 
   def scan
-    puts "Scanning"
+    log "Scanning"
 
     encnets = []
     unencnets = []
@@ -92,7 +90,7 @@ class Scanner
         end
       end
 
-      puts "Encnets: #{encnets.size} Unencnets: #{unencnets.size}"
+      log "Encnets: #{encnets.size} Unencnets: #{unencnets.size}"
 
       encnets.each do |s|
         f.puts s
@@ -112,6 +110,10 @@ class Scanner
     true
 
     #exit(0)
+  end
+
+  def log(message)
+    @logger.log message
   end
 
 end

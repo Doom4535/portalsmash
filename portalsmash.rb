@@ -5,6 +5,7 @@ require 'yaml'
 require_relative 'exec'
 require_relative 'scanner'
 require_relative 'smasher'
+require_relative 'log'
 
 #State Machine
 
@@ -49,6 +50,7 @@ class PortalSmasher
     @scanner = Scanner.new(dev,file,exec)
     @smasher = Smasher.new
     @sig = sig
+    @logger = Log.new
   end
 
   def scan
@@ -61,10 +63,10 @@ class PortalSmasher
 
   def attach
     if (@net_counter.to_i >= number_of_networks.to_i)
-      puts "I'm out of networks to which I can attach."
+      log "I'm out of networks to which I can attach."
       return ATTACH_OUT
     end
-    puts "Attaching to Network #{@net_counter+1} of #{number_of_networks}."
+    log "Attaching to Network #{@net_counter+1} of #{number_of_networks}."
 
     exec.wpa_cli_select(@net_counter)
 
@@ -84,7 +86,7 @@ class PortalSmasher
   end
 
   def dhcp
-    puts "DCHP-ing"
+    log "DCHP-ing"
     exec.dhclient_release(@device)
     exec.dhclient(@device)
     exec.exitstatus == 0
@@ -106,7 +108,7 @@ class PortalSmasher
       begin
         pid = File.read @sig
       rescue => e
-        puts "I was given a PID file to tell, but I don't see it."
+        log "I was given a PID file to tell, but I don't see it."
       end
       if !pid.nil?
         exec.kill(pid)
@@ -116,8 +118,8 @@ class PortalSmasher
 
   def run
     while true
-      puts ""
-      puts "State: #{@state}"
+      log ""
+      log "State: #{@state}"
       check_state
       sleep 2
     end
@@ -130,11 +132,11 @@ class PortalSmasher
       @state = :list
       if startwpa == false
         @state = :start
-        puts "Failed to start wpa_supplicant. Are you root?"
+        log "Failed to start wpa_supplicant. Are you root?"
       end
     else
       @state = :start
-      puts "Scan failed using #{@device}."
+      log "Scan failed using #{@device}."
     end
   end
 
@@ -200,6 +202,10 @@ class PortalSmasher
       when :monitor
         monitor
     end
+  end
+
+  def log(message)
+    @logger.log message
   end
 
 end

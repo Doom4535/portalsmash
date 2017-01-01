@@ -2,6 +2,7 @@
 
 require 'rubygems'
 require 'mechanize'
+require_relative 'log'
 
 class Smasher
 
@@ -10,10 +11,11 @@ class Smasher
   def initialize()
     @page = nil
     @agent = Mechanize.new
+    @logger = Log.new
   end
 
   def conncheck
-    puts "Checking Connection"
+    log "Checking Connection"
     begin
       @page = @agent.get(TESTPAGE)
       if (@page.title == "Success") #Could add other checks here.
@@ -22,13 +24,13 @@ class Smasher
         false
       end
     rescue => e
-      puts "Crash during connection checking, so that's a no."
+      log "Crash during connection checking, so that's a no."
       false
     end
   end
 
   def runbreak
-    puts "Portal Breaking"
+    log "Portal Breaking"
     return if @page.nil?
     if (@page.forms.size == 1 && @page.forms[0].buttons.size == 1)
       f = @page.forms[0]
@@ -47,6 +49,10 @@ class Smasher
         p8 = agent.get('http://portals.wanderingwifi.com:8080/session.asp')
       end
     end
+  end
+
+  def log(message)
+    @logger.log message
   end
 
 end
