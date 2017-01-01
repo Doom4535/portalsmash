@@ -40,8 +40,8 @@ class PortalSmasher
   CONFPATH = '/tmp/portalsmash.conf'
 
   ATTACH_SUCCESS = 0
-  ATTACH_FAIL = 1
-  ATTACH_OUT = 2
+  ATTACH_FAIL    = 1
+  ATTACH_OUT     = 2
 
   def initialize(dev, file, sig, exec)
     @exec = exec
@@ -68,14 +68,13 @@ class PortalSmasher
       log "I'm out of networks to which I can attach."
       return ATTACH_OUT
     end
-    log "Attaching to Network #{@net_counter+1} of #{number_of_networks}."
-
-    exec.wpa_cli_select(@net_counter)
-
+    try_attaching_to(@net_counter)
     @net_counter += 1
-
     snooze 5
+    attach_status
+  end
 
+  def attach_status
     if (attach_successful)
       return ATTACH_SUCCESS
     elsif (out_of_networks_to_attach_to)
@@ -83,7 +82,11 @@ class PortalSmasher
     else
       return ATTACH_FAIL
     end
+  end
 
+  def try_attaching_to(network)
+    log "Attaching to Network #{@net_counter+1} of #{number_of_networks}."
+    exec.wpa_cli_select(@net_counter)
   end
 
   def out_of_networks_to_attach_to
