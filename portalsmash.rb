@@ -315,11 +315,7 @@ class PortalSmasher
       when :monitor
         sleep 2
         @cc_success = conncheck
-        if @cc_success
-          @state = :monitor
-        else
-          @state = :start
-        end
+        @state = @cc_success ? :monitor : :start
       end
     end
   end
