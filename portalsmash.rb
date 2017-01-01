@@ -161,8 +161,8 @@ class PortalSmasher
   end
 
   def hasip
-    @cc_success = smasher.conncheck
-    if @cc_success
+    conncheck
+    if cc_success
       sendsig
       @state = :monitor
     else
@@ -172,8 +172,8 @@ class PortalSmasher
 
   def breaker
     smasher.runbreak
-    @cc_success = smasher.conncheck
-    if @cc_success
+    conncheck
+    if cc_success
       sendsig
       @state = :monitor
     else
@@ -182,8 +182,12 @@ class PortalSmasher
   end
 
   def monitor
+    conncheck
+    @state = cc_success ? :monitor : :start
+  end
+
+  def conncheck
     @cc_success = smasher.conncheck
-    @state = @cc_success ? :monitor : :start
   end
 
   def check_state
