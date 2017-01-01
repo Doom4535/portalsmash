@@ -33,7 +33,6 @@ require_relative 'smasher'
 
 class PortalSmasher
 
-  #Variables for seeing what it's doing right now - not modifiable outside the class
   attr_reader :state, :scan_success, :attach_state, :dhcp_success, :cc_success, :scanner, :smasher, :exec
 
   CONFPATH = '/tmp/portalsmash.conf'
@@ -45,15 +44,11 @@ class PortalSmasher
   def initialize(dev, file, sig, exec)
     @exec = exec
     @state = :start
-
     @net_counter = 0
-
-    #Storage variables internal to the class (No accessors)
     @device = dev
     @scanner = Scanner.new(dev,file,exec)
     @smasher = Smasher.new
     @sig = sig
-
   end
 
   def scan
