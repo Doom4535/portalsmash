@@ -5,6 +5,7 @@ require 'yaml'
 require_relative 'exec'
 require_relative 'scanner'
 require_relative 'smasher'
+require_relative 'timer'
 require_relative 'log'
 
 #State Machine
@@ -17,20 +18,20 @@ require_relative 'log'
 #   Breaker - We're running the breaker.
 #   Monitor - Connection is solid, we'll periodically check it.
 
-# State, Transition, New State
+# State     Transition    -> New State
 
-# Start, ScanSuccess, List
-# Start, ScanFail, Start
-# List, AttachSuccess, Attached
-# List, AttachFail, List
-# Attached, DHCPSuccess, HasIP
-# Attached, DHCPFail, List
-# HasIP, CCSuccess, Monitor
-# HasIP, CCFail, Breaker
-# Breaker, CCSuccess, Monitor
-# Breaker, CCFail, List
-# Monitor, CCSuccess, Monitor
-# Monitor, CCFail, Start
+# Start     ScanSuccess   -> List
+#           ScanFail      -> Start
+# List      AttachSuccess -> Attached
+#           AttachFail    -> List
+# Attached  DHCPSuccess   -> HasIP
+#           DHCPFail      -> List
+# HasIP     CCSuccess     -> Monitor
+#           CCFail        -> Breaker
+# Breaker   CCSuccess     -> Monitor
+#           CCFail        -> List
+# Monitor   CCSuccess     -> Monitor
+#           CCFail        -> Start
 
 class PortalSmasher
 
@@ -50,6 +51,7 @@ class PortalSmasher
     @scanner = Scanner.new(dev,file,exec)
     @smasher = Smasher.new
     @sig = sig
+    @timer = Timer.new
     @logger = Log.new
   end
 
@@ -72,7 +74,7 @@ class PortalSmasher
 
     @net_counter += 1
 
-    sleep(5)
+    snooze 5
     stat = @exec.wpa_cli_status
 
     if (stat =~ /COMPLETED/)
@@ -121,7 +123,7 @@ class PortalSmasher
       log ""
       log "State: #{@state}"
       check_state
-      sleep 2
+      snooze 2
     end
   end
 
@@ -202,6 +204,10 @@ class PortalSmasher
       when :monitor
         monitor
     end
+  end
+
+  def snooze(amount)
+    @timer.snooze amount
   end
 
   def log(message)
