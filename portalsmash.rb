@@ -33,7 +33,7 @@ require_relative 'exec'
 class PortalSmasher
 
   #Variables for seeing what it's doing right now - not modifiable outside the class
-  attr_reader :state, :running, :scan_success, :attach_state, :dhcp_success, :cc_success, :number_of_networks, :net_counter, :exec
+  attr_reader :state, :scan_success, :attach_state, :dhcp_success, :cc_success, :number_of_networks, :net_counter, :exec
 
   TESTPAGE = 'http://www.apple.com/library/test/success.html'
   CONFPATH = '/tmp/portalsmash.conf'
@@ -45,7 +45,6 @@ class PortalSmasher
   def initialize(dev, file, sig, exec)
     @exec = exec
     @state = :start
-    @running = true
 
     @number_of_networks = 0
     @net_counter = 0
@@ -61,10 +60,6 @@ class PortalSmasher
     if file
       @knownnetworks = YAML.load_file(file)
     end
-  end
-
-  def stop
-    @running = false
   end
 
   def scan
@@ -258,7 +253,7 @@ class PortalSmasher
   end
 
   def run
-    while @running
+    while true
       #sleep 1
       puts ""
       puts "State: #{@state}"
