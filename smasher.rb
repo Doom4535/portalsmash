@@ -7,10 +7,6 @@ class Smasher
 
   TESTPAGE = 'http://www.apple.com/library/test/success.html'
 
-  ATTACH_SUCCESS = 0
-  ATTACH_FAIL = 1
-  ATTACH_OUT = 2
-
   def initialize()
     @page = nil
     @agent = Mechanize.new
