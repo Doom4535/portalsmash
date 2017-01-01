@@ -261,54 +261,78 @@ class PortalSmasher
     end
   end
 
+  def start
+    killthings
+    @scan_success = scan
+    if @scan_success
+      @state = :list
+      if startwpa == false
+        @state = :start
+        puts "Failed to start wpa_supplicant. Are you root?"
+      end
+    else
+      @state = :start
+      puts "Scan failed using #{@device}."
+    end
+  end
+
+  def list
+    @attach_state = attach
+    case @attach_state
+    when ATTACH_SUCCESS
+      @state = :attached
+    when ATTACH_FAIL
+      @state = :list
+    when ATTACH_OUT
+      @state = :start
+    end
+  end
+
+  def attached
+    @dhcp_success = dhcp
+    @state = @dhcp_success ? :hasip : :attached
+  end
+
+  def hasip
+    @cc_success = conncheck
+    if @cc_success
+      sendsig
+      @state = :monitor
+    else
+      @state = :breaker
+    end
+  end
+
+  def breaker
+    runbreak
+    @cc_success = conncheck
+    if @cc_success
+      sendsig
+      @state = :monitor
+    else
+      @state = :list
+    end
+  end
+
+  def monitor
+    @cc_success = conncheck
+    @state = @cc_success ? :monitor : :start
+  end
+
   def check_state
     case @state
       when :start
-        killthings
-        @scan_success = scan
-        if @scan_success
-          @state = :list
-          if startwpa == false
-            @state = :start
-            puts "Failed to start wpa_supplicant. Are you root?"
-          end
-        else
-          @state = :start
-          puts "Scan failed using #{@device}."
-        end
+        start
       when :list
-        @attach_state = attach
-        case @attach_state
-        when ATTACH_SUCCESS
-          @state = :attached
-        when ATTACH_FAIL
-          @state = :list
-        when ATTACH_OUT
-          @state = :start
-        end
+        list
       when :attached
-        @dhcp_success = dhcp
-        @state = @dhcp_success ? :hasip : :attached
+        attached
       when :hasip
-        @cc_success = conncheck
-        if @cc_success
-          sendsig
-          @state = :monitor
-        else
-          @state = :breaker
-        end
+        hasip
       when :breaker
-        runbreak
-        @cc_success = conncheck
-        if @cc_success
-          sendsig
-          @state = :monitor
-        else
-          @state = :list
-        end
+        breaker
       when :monitor
-        @cc_success = conncheck
-        @state = @cc_success ? :monitor : :start
+        monitor
     end
   end
 
