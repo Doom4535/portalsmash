@@ -35,7 +35,7 @@ require_relative 'log'
 
 class PortalSmasher
 
-  attr_reader :state, :attach_state, :dhcp_success, :scanner, :smasher, :exec
+  attr_reader :state, :attach_state, :scanner, :smasher, :exec
 
   CONFPATH = '/tmp/portalsmash.conf'
 
@@ -154,8 +154,7 @@ class PortalSmasher
   end
 
   def attached
-    @dhcp_success = dhcp
-    @state = @dhcp_success ? :hasip : :attached
+    @state = dhcp ? :hasip : :attached
   end
 
   def hasip
