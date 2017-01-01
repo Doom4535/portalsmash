@@ -35,7 +35,7 @@ require_relative 'log'
 
 class PortalSmasher
 
-  attr_reader :state, :attach_state, :dhcp_success, :cc_success, :scanner, :smasher, :exec
+  attr_reader :state, :attach_state, :dhcp_success, :scanner, :smasher, :exec
 
   CONFPATH = '/tmp/portalsmash.conf'
 
@@ -159,8 +159,7 @@ class PortalSmasher
   end
 
   def hasip
-    conncheck
-    if cc_success
+    if conncheck
       sendsig
       @state = :monitor
     else
@@ -170,8 +169,7 @@ class PortalSmasher
 
   def breaker
     smasher.runbreak
-    conncheck
-    if cc_success
+    if conncheck
       sendsig
       @state = :monitor
     else
@@ -180,12 +178,11 @@ class PortalSmasher
   end
 
   def monitor
-    conncheck
-    @state = cc_success ? :monitor : :start
+    @state = conncheck ? :monitor : :start
   end
 
   def conncheck
-    @cc_success = smasher.conncheck
+    smasher.conncheck
   end
 
   def check_state
