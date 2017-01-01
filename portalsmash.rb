@@ -46,7 +46,6 @@ class PortalSmasher
     @exec = exec
     @state = :start
 
-    @number_of_networks = 0
     @net_counter = 0
 
     #Storage variables internal to the class (No accessors)
@@ -61,12 +60,16 @@ class PortalSmasher
     scanner.scan
   end
 
+  def number_of_networks
+    scanner.number_of_networks
+  end
+
   def attach
-    if (@net_counter.to_i >= @number_of_networks.to_i)
+    if (@net_counter.to_i >= number_of_networks.to_i)
       puts "I'm out of networks to which I can attach."
       return ATTACH_OUT
     end
-    puts "Attaching to Network #{@net_counter+1} of #{@number_of_networks}."
+    puts "Attaching to Network #{@net_counter+1} of #{number_of_networks}."
 
     exec.wpa_cli_select(@net_counter)
 
@@ -77,7 +80,7 @@ class PortalSmasher
 
     if (stat =~ /COMPLETED/)
       return ATTACH_SUCCESS
-    elsif (@net_counter.to_i >= @number_of_networks.to_i)
+    elsif (@net_counter.to_i >= number_of_networks.to_i)
       return ATTACH_OUT
     else
       return ATTACH_FAIL

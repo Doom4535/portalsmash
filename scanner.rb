@@ -6,7 +6,7 @@ require 'yaml'
 class Scanner
 
   #Variables for seeing what it's doing right now - not modifiable outside the class
-  attr_reader :number_of_networks, :net_counter, :exec
+  attr_reader :number_of_networks, :exec
 
   CONFPATH = '/tmp/portalsmash.conf'
 
@@ -14,7 +14,6 @@ class Scanner
     @exec = exec
 
     @number_of_networks = 0
-    @net_counter = 0
 
     #Storage variables internal to the class (No accessors)
     @device = dev
@@ -105,7 +104,6 @@ class Scanner
 
     end
 
-    @net_counter = 0
     @number_of_networks = encnets.size + unencnets.size
     if (@number_of_networks == 0)
       return false
