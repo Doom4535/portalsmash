@@ -11,12 +11,12 @@ require_relative 'log'
 #State Machine
 
 # States:
-#   Start - we know nothing.
-#   List - We have the scanned list, written to a file.
+#   Start    - we know nothing.
+#   List     - We have the scanned list, written to a file.
 #   Attached - We've gotten an attached note from WPA_CLI.
-#   HasIP - We have an IP address from dhclient.
-#   Breaker - We're running the breaker.
-#   Monitor - Connection is solid, we'll periodically check it.
+#   HasIP    - We have an IP address from dhclient.
+#   Breaker  - We're running the breaker.
+#   Monitor  - Connection is solid, we'll periodically check it.
 
 # State     Transition    -> New State
 
@@ -35,7 +35,7 @@ require_relative 'log'
 
 class PortalSmasher
 
-  attr_reader :state, :scan_success, :attach_state, :dhcp_success, :cc_success, :scanner, :smasher, :exec
+  attr_reader :state, :attach_state, :dhcp_success, :cc_success, :scanner, :smasher, :exec
 
   CONFPATH = '/tmp/portalsmash.conf'
 
@@ -129,8 +129,7 @@ class PortalSmasher
 
   def start
     killthings
-    @scan_success = scan
-    if @scan_success
+    if scan
       @state = :list
       if startwpa == false
         @state = :start
