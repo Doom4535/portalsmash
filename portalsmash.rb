@@ -35,7 +35,7 @@ require_relative 'log'
 
 class PortalSmasher
 
-  attr_reader :state, :attach_state, :scanner, :smasher, :exec
+  attr_reader :state, :scanner, :smasher, :exec
 
   CONFPATH = '/tmp/portalsmash.conf'
 
@@ -142,14 +142,13 @@ class PortalSmasher
   end
 
   def list
-    @attach_state = attach
-    case @attach_state
-    when ATTACH_SUCCESS
-      @state = :attached
-    when ATTACH_FAIL
-      @state = :list
-    when ATTACH_OUT
-      @state = :start
+    case attach
+      when ATTACH_SUCCESS
+        @state = :attached
+      when ATTACH_FAIL
+        @state = :list
+      when ATTACH_OUT
+        @state = :start
     end
   end
 
