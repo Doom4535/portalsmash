@@ -177,16 +177,9 @@ class PortalSmasher
 
   def dhcp
     puts "DCHP-ing"
-
     exec.dhclient_release(@device)
     exec.dhclient(@device)
-
-    if @exec.exitstatus != 0
-      return false
-    else
-      return true
-    end
-
+    exec.exitstatus == 0
   end
 
   def killthings
