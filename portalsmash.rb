@@ -254,10 +254,15 @@ class PortalSmasher
 
   def run
     while true
-      #sleep 1
       puts ""
       puts "State: #{@state}"
-      case @state
+      check_state
+      sleep 2
+    end
+  end
+
+  def check_state
+    case @state
       when :start
         killthings
         @scan_success = scan
@@ -266,12 +271,10 @@ class PortalSmasher
           if startwpa == false
             @state = :start
             puts "Failed to start wpa_supplicant. Are you root?"
-            sleep(2)
           end
         else
           @state = :start
           puts "Scan failed using #{@device}."
-          sleep(2)
         end
       when :list
         @attach_state = attach
@@ -285,11 +288,7 @@ class PortalSmasher
         end
       when :attached
         @dhcp_success = dhcp
-        if @dhcp_success
-          @state = :hasip
-        else
-          @state = :attached
-        end
+        @state = @dhcp_success ? :hasip : :attached
       when :hasip
         @cc_success = conncheck
         if @cc_success
@@ -308,10 +307,9 @@ class PortalSmasher
           @state = :list
         end
       when :monitor
-        sleep 2
         @cc_success = conncheck
         @state = @cc_success ? :monitor : :start
-      end
     end
   end
+
 end
