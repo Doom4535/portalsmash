@@ -2,7 +2,6 @@
 
 require 'rubygems'
 require 'yaml'
-require_relative 'exec'
 require_relative 'go'
 require_relative 'scanner'
 require_relative 'smasher'
@@ -37,8 +36,6 @@ require_relative 'log'
 class PortalSmasher
 
   attr_reader :state, :scanner, :smasher, :go
-
-  CONFPATH = '/tmp/portalsmash.conf'
 
   ATTACH_SUCCESS = 0
   ATTACH_FAIL    = 1
