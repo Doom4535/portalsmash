@@ -22,11 +22,13 @@ class Exec
   end
 
   def dhcpclient_release(device)
-    `dhclient #{device} -cf #{DHCP_CONFIG} -r` #DHCP Release, and tells any old DHClients to let go of @device
+    #DHCP Release, and tells any old DHClients to let go of @device
+    `dhclient #{device} -cf #{DHCP_CONFIG} -r`
   end
 
   def dhcpclient(device)
-    `dhclient #{device} -cf #{DHCP_CONFIG} -1` #Try just once, with timeout specified in DHCP_CONFIG
+    #Try just once, with timeout specified in DHCP_CONFIG
+    `dhclient #{device} -cf #{DHCP_CONFIG} -1`
   end
 
   def pkill_wpa_supplicant
@@ -38,7 +40,8 @@ class Exec
   end
 
   def ifconfig_up(device)
-    `ifconfig #{device} up` #because when we've killed this, sometimes it stays down.
+    #because when we've killed this, sometimes it stays down.
+    `ifconfig #{device} up`
   end
 
   def wpa_supplicant(device)
