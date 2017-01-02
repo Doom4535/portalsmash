@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'yaml'
 require_relative 'exec'
+require_relative 'go'
 require_relative 'scanner'
 require_relative 'smasher'
 require_relative 'timer'
@@ -35,7 +36,7 @@ require_relative 'log'
 
 class PortalSmasher
 
-  attr_reader :state, :scanner, :smasher, :exec
+  attr_reader :state, :scanner, :smasher, :go
 
   CONFPATH = '/tmp/portalsmash.conf'
 
@@ -45,6 +46,7 @@ class PortalSmasher
 
   def initialize(dev, file, sig, exec)
     @exec = exec
+    @go = Go.new(dev,sig,exec)
     @state = :start
     @net_counter = 0
     @device = dev
@@ -68,14 +70,14 @@ class PortalSmasher
       log "I'm out of networks to which I can attach."
       return ATTACH_OUT
     end
-    try_attaching_to(@net_counter)
+    go.try_attaching_to(@net_counter)
     @net_counter += 1
     snooze 5
     attach_status
   end
 
   def attach_status
-    if (attach_successful)
+    if (go.attach_successful)
       return ATTACH_SUCCESS
     elsif (out_of_networks_to_attach_to)
       return ATTACH_OUT
@@ -84,49 +86,8 @@ class PortalSmasher
     end
   end
 
-  def try_attaching_to(network)
-    log "Attaching to Network #{@net_counter+1} of #{number_of_networks}."
-    exec.wpa_cli_select(@net_counter)
-  end
-
   def out_of_networks_to_attach_to
     @net_counter.to_i >= number_of_networks.to_i
-  end
-
-  def attach_successful
-    stat = exec.wpa_cli_status
-    stat =~ /COMPLETED/
-  end
-
-  def dhcp
-    log "DCHP-ing"
-    exec.dhclient_release(@device)
-    exec.dhclient(@device)
-    exec.exitstatus == 0
-  end
-
-  def kill_things
-    exec.pkill_wpa_supplicant
-    exec.pkill_dhclient
-    exec.ifconfig_up(@device)
-  end
-
-  def start_wpa
-    exec.wpa_supplicant(device)
-    exec.exitstatus == 0
-  end
-
-  def send_sig
-    if !@sig.nil?
-      begin
-        pid = File.read @sig
-      rescue => e
-        log "I was given a PID file to tell, but I don't see it."
-      end
-      if !pid.nil?
-        exec.kill(pid)
-      end
-    end
   end
 
   def run
@@ -139,7 +100,7 @@ class PortalSmasher
   end
 
   def start
-    kill_things
+    go.kill_things
     if scan
       @state = :list
       if start_wpa == false
