@@ -26,10 +26,11 @@ class Scanner
       # This is just a brutal hack.
       # I can be a lot more precise-- specifying CCMP and the like-- but it doesn't matter, weirdly.
 
+      key = @known_networks[ssid]['key']
       if net =~ /WPA/
-        if (@known_networks[ssid]['key']) #Then it's WPA-PSK
+        if (key) #Then it's WPA-PSK
           str += "key_mgmt=WPA-PSK\n"
-          str += "psk=\"#{@known_networks[ssid]['key']}\"\n"
+          str += "psk=\"#{key}\"\n"
         else #Then it's WPAE
           str += "key_mgmt=WPA-EAP\n"
           str += "identity=\"#{@known_networks[ssid]['username']}\"\n"
@@ -38,7 +39,7 @@ class Scanner
       else #WEP
         str += "key_mgmt=NONE\n"
         str += "wep_tx_keyidx=0\n"
-        str += "wep_key0=\"#{@known_networks[ssid]['key']}\"\n"
+        str += "wep_key0=\"#{key}\"\n"
       end
 
     else
