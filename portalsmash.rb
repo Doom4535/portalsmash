@@ -105,18 +105,18 @@ class PortalSmasher
     exec.exitstatus == 0
   end
 
-  def killthings
+  def kill_things
     exec.pkill_wpa_supplicant
     exec.pkill_dhclient
     exec.ifconfig_up(@device)
   end
 
-  def startwpa
+  def start_wpa
     exec.wpa_supplicant(device)
     exec.exitstatus == 0
   end
 
-  def sendsig
+  def send_sig
     if !@sig.nil?
       begin
         pid = File.read @sig
@@ -139,10 +139,10 @@ class PortalSmasher
   end
 
   def start
-    killthings
+    kill_things
     if scan
       @state = :list
-      if startwpa == false
+      if start_wpa == false
         @state = :start
         log "Failed to start wpa_supplicant. Are you root?"
       end
@@ -164,12 +164,12 @@ class PortalSmasher
   end
 
   def attached
-    @state = dhcp ? :hasip : :attached
+    @state = dhcp ? :has_ip : :attached
   end
 
-  def hasip
-    if conncheck
-      sendsig
+  def has_ip
+    if connection_ok
+      send_sig
       @state = :monitor
     else
       @state = :breaker
@@ -177,9 +177,9 @@ class PortalSmasher
   end
 
   def breaker
-    smasher.runbreak
-    if conncheck
-      sendsig
+    smasher.login
+    if connection_ok
+      send_sig
       @state = :monitor
     else
       @state = :list
@@ -187,11 +187,11 @@ class PortalSmasher
   end
 
   def monitor
-    @state = conncheck ? :monitor : :start
+    @state = connection_ok ? :monitor : :start
   end
 
-  def conncheck
-    smasher.conncheck
+  def connection_ok
+    smasher.connection_ok
   end
 
   def check_state
@@ -202,8 +202,8 @@ class PortalSmasher
         list
       when :attached
         attached
-      when :hasip
-        hasip
+      when :has_ip
+        has_ip
       when :breaker
         breaker
       when :monitor

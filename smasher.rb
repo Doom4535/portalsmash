@@ -14,7 +14,7 @@ class Smasher
     @logger = Log.new
   end
 
-  def conncheck
+  def connection_ok
     log "Checking Connection"
     begin
       @page = @agent.get(TESTPAGE)
@@ -29,7 +29,7 @@ class Smasher
     end
   end
 
-  def runbreak
+  def login
     log "Portal Breaking"
     return if @page.nil?
     if (@page.forms.size == 1 && @page.forms[0].buttons.size == 1)
