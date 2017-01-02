@@ -47,6 +47,18 @@ class Scanner
     str += "}\n"
   end
 
+  def networks
+    networklist = exec.iwlist(@device)
+
+    if (exec.exitstatus != 0)
+      return [] #iwlist didn't work right.
+    end
+
+    cells = networklist.split(/Cell \d{2}/); #This will give us cell 1 in @networks[1], as [0] will hold junk
+    cells.delete_at(0)
+    cells
+  end
+
   def scan
     log "Scanning"
 
@@ -55,16 +67,6 @@ class Scanner
 
     File.open(CONFPATH, "w") do |f|
       f.puts "ctrl_interface=DIR=/var/run/wpa_supplicant"
-
-      networklist = exec.iwlist(@device)
-
-      if (exec.exitstatus != 0)
-        return false #iwlist didn't work right.
-      end
-
-      networks = networklist.split(/Cell \d{2}/); #This will give us cell 1 in @networks[1], as [0] will hold junk
-      networks.delete_at(0)
-
       usednetworks = {}
 
       networks.each do |net|
