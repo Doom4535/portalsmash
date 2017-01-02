@@ -46,6 +46,15 @@ HEREBEDRAGONS
 end
 
 
-exec = Exec.new
-ps = PortalSmasher.new(opts[:device], opts[:netfile], opts[:sig], exec)
+dev  = opts[:device]
+sig  = opts[:sig]
+file = opts[:netfile]
+exec    = Exec.new
+go      = Go.new(dev,sig,exec)
+scanner = Scanner.new(dev,file,exec)
+smasher = Smasher.new
+timer   = Timer.new
+logger  = Log.new
+
+ps = PortalSmasher.new(dev, scanner, smasher, go, timer, logger)
 ps.run

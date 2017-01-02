@@ -44,17 +44,15 @@ class PortalSmasher
   ATTACH_FAIL    = 1
   ATTACH_OUT     = 2
 
-  def initialize(dev, file, sig, exec)
-    @exec = exec
-    @go = Go.new(dev,sig,exec)
-    @state = :start
+  def initialize(dev, scanner, smasher, go, timer, logger)
+    @state       = :start
     @net_counter = 0
-    @device = dev
-    @scanner = Scanner.new(dev,file,exec)
-    @smasher = Smasher.new
-    @sig = sig
-    @timer = Timer.new
-    @logger = Log.new
+    @device  = dev
+    @scanner = scanner
+    @smasher = smasher
+    @go      = go
+    @timer   = timer
+    @logger  = logger
   end
 
   def scan
@@ -130,7 +128,7 @@ class PortalSmasher
 
   def has_ip
     if connection_ok
-      send_sig
+      go.send_sig
       @state = :monitor
     else
       @state = :breaker
@@ -140,7 +138,7 @@ class PortalSmasher
   def breaker
     smasher.login
     if connection_ok
-      send_sig
+      go.send_sig
       @state = :monitor
     else
       @state = :list
