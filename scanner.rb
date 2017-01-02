@@ -59,37 +59,9 @@ class Scanner
     cells
   end
 
-  def scan
-    log "Scanning"
-
-    encnets = []
-    unencnets = []
-
+  def write_config(encnets,unencnets)
     File.open(CONFPATH, "w") do |f|
       f.puts "ctrl_interface=DIR=/var/run/wpa_supplicant"
-      usednetworks = {}
-
-      networks.each do |net|
-        data = net.split(/\n/)
-        bssid = data[0].match(/([A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2})/)[1]
-        ssid = data[5].match(/ESSID\:\"(.*)\"/)[1]
-        enc = data[4].match(/Encryption key:(.+)/)[1]
-
-        #So, only proceed if either we know the network, or if there's no encryption -- and either way, only
-        #if we haven't done this network before (to prevent trying to connect to 80 different instances of
-        #the same WiFi network)
-        if (!usednetworks[ssid] and ((enc == "off") or (@known_networks[ssid])))
-          str = network_string(net,ssid,enc)
-          usednetworks[ssid] = 1
-
-          if @known_networks[ssid]
-            encnets.push(str)
-          else
-            unencnets.push(str)
-          end
-
-        end
-      end
 
       log "Encnets: #{encnets.size} Unencnets: #{unencnets.size}"
 
@@ -102,7 +74,38 @@ class Scanner
       end
 
     end
+  end
 
+  def scan
+    log "Scanning"
+
+    encnets = []
+    unencnets = []
+    usednetworks = {}
+
+    networks.each do |net|
+      data = net.split(/\n/)
+      bssid = data[0].match(/([A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2}:[A-F0-9]{2})/)[1]
+      ssid = data[5].match(/ESSID\:\"(.*)\"/)[1]
+      enc = data[4].match(/Encryption key:(.+)/)[1]
+
+      #So, only proceed if either we know the network, or if there's no encryption -- and either way, only
+      #if we haven't done this network before (to prevent trying to connect to 80 different instances of
+      #the same WiFi network)
+      if (!usednetworks[ssid] and ((enc == "off") or (@known_networks[ssid])))
+        str = network_string(net,ssid,enc)
+        usednetworks[ssid] = 1
+
+        if @known_networks[ssid]
+          encnets.push(str)
+        else
+          unencnets.push(str)
+        end
+
+      end
+    end
+
+    write_config(encnets,unencnets)
     @number_of_networks = encnets.size + unencnets.size
     @number_of_networks != 0
   end
