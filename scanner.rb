@@ -17,6 +17,36 @@ class Scanner
     @known_networks = known_networks
   end
 
+  def network_string(net,ssid,enc)
+    str = ""
+    str += "network={\n"
+    str += "ssid=\"#{ssid}\"\n"
+    str += "scan_ssid=1\n"
+    if (enc == "on")
+      # This is just a brutal hack.
+      # I can be a lot more precise-- specifying CCMP and the like-- but it doesn't matter, weirdly.
+
+      if net =~ /WPA/
+        if (@known_networks[ssid]['key']) #Then it's WPA-PSK
+          str += "key_mgmt=WPA-PSK\n"
+          str += "psk=\"#{@known_networks[ssid]['key']}\"\n"
+        else #Then it's WPAE
+          str += "key_mgmt=WPA-EAP\n"
+          str += "identity=\"#{@known_networks[ssid]['username']}\"\n"
+          str += "password=\"#{@known_networks[ssid]['password']}\"\n"
+        end
+      else #WEP
+        str += "key_mgmt=NONE\n"
+        str += "wep_tx_keyidx=0\n"
+        str += "wep_key0=\"#{@known_networks[ssid]['key']}\"\n"
+      end
+
+    else
+      str += "key_mgmt=NONE\n"
+    end
+    str += "}\n"
+  end
+
   def scan
     log "Scanning"
 
@@ -45,35 +75,9 @@ class Scanner
 
         #So, only proceed if either we know the network, or if there's no encryption -- and either way, only
         #if we haven't done this network before (to prevent trying to connect to 80 different instances of
-        #the same WiFi network)7888888
+        #the same WiFi network)
         if (!usednetworks[ssid] and ((enc == "off") or (@known_networks[ssid])))
-          str = ""
-          str += "network={\n"
-          str += "ssid=\"#{ssid}\"\n"
-          str += "scan_ssid=1\n"
-          if (enc == "on")
-            # This is just a brutal hack. I can be a lot more precise-- specifying CCMP and the like-- but it doesn't matter, weirdly.
-
-            if net =~ /WPA/
-              if (@known_networks[ssid]['key']) #Then it's WPA-PSK
-                str += "key_mgmt=WPA-PSK\n"
-                str += "psk=\"#{@known_networks[ssid]['key']}\"\n"
-              else #Then it's WPAE
-                str += "key_mgmt=WPA-EAP\n"
-                str += "identity=\"#{@known_networks[ssid]['username']}\"\n"
-                str += "password=\"#{@known_networks[ssid]['password']}\"\n"
-              end
-            else #WEP
-              str += "key_mgmt=NONE\n"
-              str += "wep_tx_keyidx=0\n"
-              str += "wep_key0=\"#{@known_networks[ssid]['key']}\"\n"
-            end
-
-          else
-            str += "key_mgmt=NONE\n"
-          end
-          str += "}\n"
-
+          str = network_string(net,ssid,enc)
           usednetworks[ssid] = 1
 
           if @known_networks[ssid]
