@@ -103,13 +103,7 @@ class Scanner
     end
 
     @number_of_networks = encnets.size + unencnets.size
-    if (@number_of_networks == 0)
-      return false
-    end
-
-    true
-
-    #exit(0)
+    @number_of_networks != 0
   end
 
   def log(message)
