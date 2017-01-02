@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 
 require 'rubygems'
-require 'yaml'
 require_relative 'log'
 
 class Scanner
@@ -10,16 +9,12 @@ class Scanner
 
   CONFPATH = '/tmp/portalsmash.conf'
 
-  def initialize(dev, file, exec)
+  def initialize(dev, known_networks, exec)
     @exec = exec
     @logger = Log.new
     @number_of_networks = 0
     @device = dev
-    @knownnetworks = {}
-
-    if file
-      @knownnetworks = YAML.load_file(file)
-    end
+    @known_networks = known_networks
   end
 
   def scan
@@ -51,7 +46,7 @@ class Scanner
         #So, only proceed if either we know the network, or if there's no encryption -- and either way, only
         #if we haven't done this network before (to prevent trying to connect to 80 different instances of
         #the same WiFi network)7888888
-        if (!usednetworks[ssid] and ((enc == "off") or (@knownnetworks[ssid])))
+        if (!usednetworks[ssid] and ((enc == "off") or (@known_networks[ssid])))
           str = ""
           str += "network={\n"
           str += "ssid=\"#{ssid}\"\n"
@@ -60,18 +55,18 @@ class Scanner
             # This is just a brutal hack. I can be a lot more precise-- specifying CCMP and the like-- but it doesn't matter, weirdly.
 
             if net =~ /WPA/
-              if (@knownnetworks[ssid]['key']) #Then it's WPA-PSK
+              if (@known_networks[ssid]['key']) #Then it's WPA-PSK
                 str += "key_mgmt=WPA-PSK\n"
-                str += "psk=\"#{@knownnetworks[ssid]['key']}\"\n"
+                str += "psk=\"#{@known_networks[ssid]['key']}\"\n"
               else #Then it's WPAE
                 str += "key_mgmt=WPA-EAP\n"
-                str += "identity=\"#{@knownnetworks[ssid]['username']}\"\n"
-                str += "password=\"#{@knownnetworks[ssid]['password']}\"\n"
+                str += "identity=\"#{@known_networks[ssid]['username']}\"\n"
+                str += "password=\"#{@known_networks[ssid]['password']}\"\n"
               end
             else #WEP
               str += "key_mgmt=NONE\n"
               str += "wep_tx_keyidx=0\n"
-              str += "wep_key0=\"#{@knownnetworks[ssid]['key']}\"\n"
+              str += "wep_key0=\"#{@known_networks[ssid]['key']}\"\n"
             end
 
           else
@@ -81,7 +76,7 @@ class Scanner
 
           usednetworks[ssid] = 1
 
-          if @knownnetworks[ssid]
+          if @known_networks[ssid]
             encnets.push(str)
           else
             unencnets.push(str)

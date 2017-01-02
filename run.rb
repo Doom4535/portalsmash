@@ -2,6 +2,7 @@
 
 require 'rubygems'
 require 'trollop'
+require 'yaml'
 require_relative 'portalsmash'
 require_relative 'exec'
 
@@ -49,9 +50,13 @@ end
 dev  = opts[:device]
 sig  = opts[:sig]
 file = opts[:netfile]
+known_networks = {}
+if file
+  known_networks = YAML.load_file(file)
+end
 exec    = Exec.new
 go      = Go.new(dev,sig,exec)
-scanner = Scanner.new(dev,file,exec)
+scanner = Scanner.new(dev,known_networks,exec)
 smasher = Smasher.new
 timer   = Timer.new
 logger  = Log.new
